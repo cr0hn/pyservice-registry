@@ -1,0 +1,5 @@
+blitzdb
+aiohttp
+pymongo
+requests
+py-cpuinfo
