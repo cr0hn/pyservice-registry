@@ -195,7 +195,8 @@ Examples:
 	# Security options
 	gr_security = parser.add_argument_group("Security options")
 	gr_security.add_argument("--password", dest="PASSWORD", help="service access password")
-	gr_security.add_argument("--disable-doc", dest="NOD_DOC", help="disable API documentation")
+	gr_security.add_argument("--disable-doc", dest="NOD_DOC", action="store_true", help="disable API documentation",
+	                         default=False)
 
 	# Scanner options
 	gr_file_db = parser.add_argument_group("File database options")
