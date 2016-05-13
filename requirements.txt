@@ -1,5 +1,6 @@
 blitzdb
-aiohttp
 pymongo
+flasgger
 requests
 py-cpuinfo
+Flask-Limiter

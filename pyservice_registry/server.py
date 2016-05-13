@@ -1,15 +1,83 @@
+# -*- coding: utf-8 -*-
+#
+# PyService-Registry - https://github.com/cr0hn/pyservice-registry
+#
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+# following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+# following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+# following disclaimer in the documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+# products derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+import os
 import logging
 import argparse
-import os
 
-from aiohttp import web
+from flask import Flask
+from flasgger import Swagger
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from blitzdb import FileBackend, MongoBackend
 
 from pyservice_registry.models import Service
 from pyservice_registry.routes.catalog import routes_catalog
 
-logging.basicConfig(level=logging.ERROR, format='[ %(levelname)-5s - Service Register ] %(asctime)s - %(message)s')
+
+logging.basicConfig(level=logging.ERROR, format='[ Service Register ] %(asctime)s - %(message)s')
 log = logging.getLogger(__name__)
+
+# --------------------------------------------------------------------------
+# Basic flask init
+# --------------------------------------------------------------------------
+app = Flask(__name__)
+app.secret_key = 'A0Zr98j/nsofsdh98hn3oha98fshd(/(hloh1hooifsahoi!"ASAVvasdf'
+
+# --------------------------------------------------------------------------
+# API Doc with swagger
+# --------------------------------------------------------------------------
+
+app.config['SWAGGER'] = {
+	"swagger_version": "2.0",
+	"headers": [
+	    ('Access-Control-Allow-Origin', '*'),
+	],
+	# another optional settings
+	# "url_prefix": "/",
+	# specs are also optional if not set /spec is registered exposing all views
+	"specs": [
+		{
+			"version": "0.0.1",
+			"title": "Api v1",
+			"endpoint": 'v1_spec',
+			"route": '/api/spec',
+		}
+	]
+}
+Swagger(app)
+
+
+# --------------------------------------------------------------------------
+# Set limiter
+# --------------------------------------------------------------------------
+limiter = Limiter(app,
+                  key_func=get_remote_address,
+                  global_limits=["80 per minute"])
 
 
 # --------------------------------------------------------------------------
@@ -78,8 +146,6 @@ def start(args):
 	# Link backend to web-server property
 	#
 	backend.autocommit = True
-	# app = web.Application(debug=args.DEBUG)
-	app = web.Application(debug=True)
 
 	# --------------------------------------------------------------------------
 	# Routes
@@ -87,11 +153,10 @@ def start(args):
 	# Catalog
 	routes_catalog(app)
 
-	app['APP_DB'] = backend
+	app.config['APP_DB'] = backend
 
-	web.run_app(app,
-	            host=args.IP,
-	            port=args.PORT)
+	app.run(host=args.IP,
+	        port=args.PORT)
 
 
 # --------------------------------------------------------------------------
@@ -111,13 +176,17 @@ Examples:
 	                                 formatter_class=argparse.RawTextHelpFormatter, epilog=example)
 
 	# Main options
-	parser.add_argument('-p', '--port', dest="PORT", type=int, help="listen port. Default 50000", default=8000)
+	parser.add_argument('-p', '--port', dest="PORT", type=int, help="listen port. Default 8000", default=8000)
 	parser.add_argument('-l', '--listen', dest="IP", help="listen IP. Default 0.0.0.0", default="0.0.0.0")
 	parser.add_argument("-v", "--verbosity", dest="VERBOSE", action="count", help="verbosity level: -v, -vv, -vvv.",
 	                    default=3)
 	parser.add_argument('-t', '--db-type', dest="DB_TYPE", help="database type. Default: file", default="file",
 	                    choices=["file", "mongodb"])
 	parser.add_argument('-d', '--debug', dest="DEBUG", action="store_true", help="enable debug mode", default=False)
+
+	# Security options
+	gr_security = parser.add_argument_group("Security options")
+	gr_security.add_argument("--password", dest="PASSWORD", help="service access password")
 
 	# Scanner options
 	gr_file_db = parser.add_argument_group("File database options")
@@ -137,6 +206,8 @@ Examples:
 	log.setLevel(50 - (parsed_args.VERBOSE * 10))
 
 	try:
+		log.critical("Starting pyService Register in %s:%s" % (parsed_args.IP, parsed_args.PORT))
+
 		start(parsed_args)
 	except Exception as e:
 		log.critical(e)

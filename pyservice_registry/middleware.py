@@ -23,38 +23,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from os.path import dirname, join
-from setuptools import setup, find_packages
+import asyncio
 
-# Import requirements
-with open(join(dirname(__file__), 'requirements.txt')) as f:
-    required = f.read().splitlines()
 
-setup(
-    name='pyservice-registry',
-    version="1.0.0",
-    install_requires=required,
-    url='https://github.com/cr0hn/pyservice-registry',
-    license='BSD',
-    author='Daniel Garcia (cr0hn) - @ggdaniel',
-    author_email='cr0hn@cr0hn.com',
-    packages=find_packages(),
-    include_package_data=True,
-    entry_points={'console_scripts': [
-            'pyregistry-server = pyservice_registry.server:main',
-            'pyregistry-client = pyservice_registry.client:main'
-    ]},
-    description='',
-    long_description=open('README.rst', "r").read(),
-    classifiers=[
-        'Environment :: Console',
-        'Intended Audience :: System Administrators',
-        'Intended Audience :: Other Audience',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: MacOS',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
-        'Programming Language :: Python :: 3',
-        'Topic :: Security',
-    ]
-)
+@asyncio.coroutine
+def middleware_login(app, handler):
+
+	@asyncio.coroutine
+	def middleware_handler(request):
+
+
+		r = yield from handler(request)
+
+		return r
+
+	return middleware_handler
