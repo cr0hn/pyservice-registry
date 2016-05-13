@@ -2,7 +2,7 @@ PyService-Registry
 ==================
 
 
-*PyService-Registry: Simple, Fast and Lightweight Service Registry*
+*PyService-Registry: Simple, Fast and Lightweight Service Registry in pure Python*
 
 :Codename: mJano
 :Version: 1.0
