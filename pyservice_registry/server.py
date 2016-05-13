@@ -57,19 +57,21 @@ app.config['SWAGGER'] = {
 	"headers": [
 	    ('Access-Control-Allow-Origin', '*'),
 	],
+	"description": "hasdfas",
 	# another optional settings
 	# "url_prefix": "/",
 	# specs are also optional if not set /spec is registered exposing all views
+
 	"specs": [
 		{
-			"version": "0.0.1",
-			"title": "Api v1",
+			"version": "1.0.0",
+			"title": "API Documentation for pyRegistry Service",
+			"description": "This API allow to handle service registry catalog",
 			"endpoint": 'v1_spec',
 			"route": '/api/spec',
 		}
 	]
 }
-Swagger(app)
 
 
 # --------------------------------------------------------------------------
@@ -155,6 +157,12 @@ def start(args):
 
 	app.config['APP_DB'] = backend
 
+	# --------------------------------------------------------------------------
+	# Enable doc?
+	# --------------------------------------------------------------------------
+	if args.NOD_DOC is False:
+		Swagger(app)
+
 	app.run(host=args.IP,
 	        port=args.PORT)
 
@@ -187,10 +195,11 @@ Examples:
 	# Security options
 	gr_security = parser.add_argument_group("Security options")
 	gr_security.add_argument("--password", dest="PASSWORD", help="service access password")
+	gr_security.add_argument("--disable-doc", dest="NOD_DOC", help="disable API documentation")
 
 	# Scanner options
 	gr_file_db = parser.add_argument_group("File database options")
-	gr_file_db.add_argument("--path", dest="FILE_DB_PATH", help="path to file database", default=None)
+	gr_file_db.add_argument("--path", dest="FILE_DB_PATH", type=bool, help="path to file database", default=False)
 
 	gr_mongo_db = parser.add_argument_group("MongoDB database options")
 	gr_mongo_db.add_argument("-H", "--mongo-host", dest="MONGODB_HOST", help="mongoDB host", default=None)

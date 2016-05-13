@@ -44,7 +44,7 @@ setup(
             'pyregistry-server = pyservice_registry.server:main',
             'pyregistry-client = pyservice_registry.client:main'
     ]},
-    description='',
+    description='PyService-Registry: Simple, Fast and Lightweight Service Registry',
     long_description=open('README.rst', "r").read(),
     classifiers=[
         'Environment :: Console',
