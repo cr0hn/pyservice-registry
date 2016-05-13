@@ -61,7 +61,7 @@ Once you run the server, you can read the API doc, visiting the URL:
 
     http://127.0.0.1:8000/apidocs/index.html
 
-.. image:: https://raw.githubusercontent.com/cr0hn/pyservice_registry/master/pyservice_registry/images/api_doc.jpg
+.. image:: https://raw.githubusercontent.com/cr0hn/pyservice-registry/master/pyservice_registry/images/api_doc.jpg
 
 What's new?
 -----------
